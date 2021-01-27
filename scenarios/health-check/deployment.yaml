@@ -43,3 +43,37 @@ spec:
     targetPort: 80
   selector:
     app: health-check
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  selector:
+    matchLabels:
+      app: deploy
+  template:
+    metadata:
+      labels:
+        app: deploy
+    spec:
+      containers:
+      - name: health-check
+        image: madhuakula/k8s-goat-health-check:latest
+        resources:
+          limits:
+            memory: "100Mi"
+            cpu: "30m"
+        ports:
+        - containerPort: 80
+      # Custom Stuff
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /custom/docker/docker.sock
+            name: docker-sock-volume
+      volumes:
+        - name: docker-sock-volume
+          hostPath:
+            path: /var/run/docker.sock
+            type: File
